@@ -22,30 +22,6 @@ This project provides a Django-based user authentication system. It includes cus
 - Django 3.x
 - Django REST Framework
 
-### Installation
-
-1. Clone the repository:
-
-    ```
-    git clone https://github.com/your_username/your_project.git
-    ```
-
-2. Navigate to the project directory:
-
-    ```
-    cd your_project
-    ```
-
-3. Install dependencies:
-
-    ```
-    pip install -r requirements.txt
-    ```
-
-### Running the Project
-
-To run the project locally, execute the following command:
-python manage.py runserver
 
 
 
