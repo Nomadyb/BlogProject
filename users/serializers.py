@@ -1,9 +1,12 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from .models import User
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
-import re 
+#import re  #regular yerine  django validator yapısına bak 
 
 
 # yapılacak işlemler
@@ -40,20 +43,38 @@ class UserSerializer(serializers.Serializer):
         instance.save()
         return instance
 
+
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
 
-        #re
-        # if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        if not re.match(r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", email):
+        try:
+            validate_email(email)
+        except ValidationError:
             raise serializers.ValidationError("Invalid email format")
 
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.messages)
 
-        if not re.match(r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()-_+=])[a-zA-Z0-9!@#$%^&*()-_+=]{8,}$", password):
-            raise serializers.ValidationError("Invalid password format")
-            
         return attrs
+
+
+    # def validate(self, attrs):
+    #     email = attrs.get('email')
+    #     password = attrs.get('password')
+
+    #     #re
+    #     # if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+    #     if not re.match(r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", email):
+    #         raise serializers.ValidationError("Invalid email format")
+
+
+    #     if not re.match(r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()-_+=])[a-zA-Z0-9!@#$%^&*()-_+=]{8,}$", password):
+    #         raise serializers.ValidationError("Invalid password format")
+            
+    #     return attrs
 
 
 
