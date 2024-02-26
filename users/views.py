@@ -14,7 +14,6 @@ from rest_framework import status
 from .models import User
 from .serializers import UserSerializer
 from rest_framework_jwt.settings import api_settings
-import logging
 
 # User = get_user_model()
 
@@ -127,5 +126,6 @@ class HomeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Burada yapılacak işlemleri ekleyin
         return Response({"message": "Welcome to the internet Have a look around"})
+
+
