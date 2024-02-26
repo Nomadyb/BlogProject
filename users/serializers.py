@@ -35,3 +35,19 @@ class UserSerializer(serializers.Serializer):
         return instance
 
     # bir validate yazmalısın
+
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        #re
+        # if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        if not re.match(r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", email):
+            raise serializers.ValidationError("Invalid email format")
+
+
+        if not re.match(r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()-_+=])[a-zA-Z0-9!@#$%^&*()-_+=]{8,}$", password):
+            raise serializers.ValidationError("Invalid password format")
+            
+        return attrs
