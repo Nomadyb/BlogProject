@@ -49,7 +49,30 @@ class UserSerializer(serializers.Serializer):
         except ValidationError as e:
             raise serializers.ValidationError(e.messages)
 
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                "Bu e-posta adresi zaten kullanılıyor.")
+
         return attrs
+
+
+
+
+    # def validate(self, attrs):
+    #     email = attrs.get("email")
+    #     password = attrs.get("password")
+
+    #     try:
+    #         validate_email(email)
+    #     except ValidationError:
+    #         raise serializers.ValidationError("Invalid email format")
+
+    #     try:
+    #         validate_password(password)
+    #     except ValidationError as e:
+    #         raise serializers.ValidationError(e.messages)
+
+    #     return attrs
 
 
 
