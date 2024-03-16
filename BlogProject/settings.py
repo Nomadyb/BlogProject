@@ -56,18 +56,12 @@ SIMPLE_JWT = {
 }
 
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#         'rest_framework.authentication.SessionAuthentication',
-#     ],
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.IsAuthenticated',
-#     ],
-# }
+
 
 #eski refresh token yapısı için 
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'BlogProject.except.custom_exception_handler',
+    # "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
@@ -103,7 +97,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
 ]
 
-
+#TODO: MIDDLWARE incele 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

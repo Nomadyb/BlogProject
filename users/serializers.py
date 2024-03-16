@@ -8,74 +8,62 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 
 
+"""
+    ilk hal bütünsel yaklaşım
+"""
+
+# User = get_user_model()
 
 
-User = get_user_model()
+# class UserSerializer(serializers.Serializer):
+#     id = serializers.IntegerField(read_only=True)
+#     username = serializers.CharField(max_length=100, required=False)
+#     email = serializers.EmailField(max_length=70)
+#     role = serializers.ChoiceField(
+#         choices=["ADMIN", "BLOGGER"], default="BLOGGER", required=False
+#     )
 
+#     password = serializers.CharField(max_length=128, write_only=True)
 
-class UserSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    username = serializers.CharField(max_length=100, required=False)
-    email = serializers.EmailField(max_length=70)
-    role = serializers.ChoiceField(
-        choices=["ADMIN", "BLOGGER"], default="BLOGGER", required=False
-    )
+#     def create(self, validated_data):
+#         # return User.objects.create(**validated_data)
+#         user = User.objects.create_user(**validated_data)
+#         return user
 
-    password = serializers.CharField(max_length=128, write_only=True)
+#     def update(self, instance, validated_data):
+#         instance.username = validated_data.get("username", instance.username)
+#         instance.email = validated_data.get("email", instance.email)
+#         instance.role = validated_data.get("role", instance.role)
+#         instance.save()
+#         return instance
 
-    def create(self, validated_data):
-        # return User.objects.create(**validated_data)
-        user = User.objects.create_user(**validated_data)
-        return user
+#     def validate(self, attrs):
+#         email = attrs.get("email")
+#         password = attrs.get("password")
 
-    def update(self, instance, validated_data):
-        instance.username = validated_data.get("username", instance.username)
-        instance.email = validated_data.get("email", instance.email)
-        instance.role = validated_data.get("role", instance.role)
-        instance.save()
-        return instance
+#         try:
+#             validate_email(email)
+#         except ValidationError:
+#             raise serializers.ValidationError("Invalid email format")
 
-    def validate(self, attrs):
-        email = attrs.get("email")
-        password = attrs.get("password")
+#         try:
+#             validate_password(password)
+#         except ValidationError as e:
+#             raise serializers.ValidationError(e.messages)
 
-        try:
-            validate_email(email)
-        except ValidationError:
-            raise serializers.ValidationError("Invalid email format")
+#         if User.objects.filter(email=email).exists():
+#             raise serializers.ValidationError(
+#                 "Bu e-posta adresi zaten kullanılıyor.")
 
-        try:
-            validate_password(password)
-        except ValidationError as e:
-            raise serializers.ValidationError(e.messages)
-
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                "Bu e-posta adresi zaten kullanılıyor.")
-
-        return attrs
-
-
-
-
-    # def validate(self, attrs):
-    #     email = attrs.get("email")
-    #     password = attrs.get("password")
-
-    #     try:
-    #         validate_email(email)
-    #     except ValidationError:
-    #         raise serializers.ValidationError("Invalid email format")
-
-    #     try:
-    #         validate_password(password)
-    #     except ValidationError as e:
-    #         raise serializers.ValidationError(e.messages)
-
-    #     return attrs
+#         return attrs
 
 
 
+
+"""
+burası parçalı ilk deneme 
+
+"""
 
 # class IdSerializer(serializers.Serializer):
 #     id = serializers.IntegerField()
@@ -127,4 +115,97 @@ class UserSerializer(serializers.Serializer):
 #         instance.role = validated_data.get("role", instance.role)
 #         instance.save()
 #         return instance
+
+
+
+
+"""
+    son durum
+"""
+
+
+# serializers.py
+
+
+User = get_user_model()
+
+
+class IdSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+
+class CreateUserSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=100)
+    email = serializers.EmailField(max_length=70)
+    role = serializers.ChoiceField(
+        choices=["ADMIN", "BLOGGER"], default="BLOGGER"
+    )
+    password = serializers.CharField(max_length=128, write_only=True)
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                "Bu e-posta adresi zaten kullanılıyor."
+            )
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            raise serializers.ValidationError("Geçersiz e-posta adresi.")
+
+        password = attrs.get("password")
+
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.messages)
+
+        return attrs
+
+
+
+class UpdateUserSerializer(IdSerializer):
+    username = serializers.CharField(max_length=100, required=False)
+    email = serializers.EmailField(max_length=70, required=False)
+    role = serializers.ChoiceField(
+        choices=["ADMIN", "BLOGGER"], default="BLOGGER", required=False)
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get("username", instance.username)
+        instance.email = validated_data.get("email", instance.email)
+        instance.role = validated_data.get("role", instance.role)
+        instance.save()
+        return instance
+
+
+User = get_user_model()
+
+
+class UserSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    last_login = serializers.DateTimeField()
+    username = serializers.CharField(max_length=150)
+    first_name = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=254)
+    role = serializers.CharField(max_length=100)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        
+        return {
+            "id": data["id"],
+            "last_login": data["last_login"],
+            "username": data["username"],
+            "first_name": data["first_name"],
+            "email": data["email"],
+            "role": data["role"],
+
+        }
+
 
