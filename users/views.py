@@ -271,6 +271,7 @@ custom_exception_handler.py dosyası kullanmadan
 #         return Response({"message": "Welcome to the internet. Have a look around."})
 
 
+from django.http.response import JsonResponse
 import json
 from rest_framework.pagination import PageNumberPagination
 from .serializers import UserSerializer
@@ -383,14 +384,7 @@ class LoginView(APIView):
             return custom_exception_handler(e, __name__)  
 
 
-# class HomeView(APIView):
-#     permission_classes = [IsAuthenticated]
 
-#     def get(self, request):
-#         try:
-#             return Response({"message": "Welcome to the internet. Have a look around."})
-#         except Exception as e:
-#             return custom_exception_handler(e, __name__)
 
 
 
@@ -400,32 +394,88 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
 
-#TODO: blog için kullanıcının kendi değerlerini al db'den tüm satırı seç yada kullanıcıya özgü olmalı
+#TODO: blogger için kullanıcının kendi değerlerini al db'den tüm satırı seç yada kullanıcıya özgü olmalı
 # TODO: admin için ise tüm kullanıcılar listelenmeli 
+# class HomeView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication_classes = (JWTAuthentication,)
+
+#     def get(self, request):
+#         try:
+#             return Response(
+#                 {
+#                     "isSuccess": True,
+#                     "message": "Login successful",
+#                     "data": request.user.username,
+
+#                 },
+#                 status=status.HTTP_200_OK,
+#             )
+ 
+
+#         except Exception as e:
+#             return custom_exception_handler(e, __name__) 
+
+
+
+
+
+# User = get_user_model()
+# class HomeView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication_classes = (JWTAuthentication,)
+
+#     def get(self, request, format=None):
+#         users = User.objects.all()
+#         users_serializer = UserSerializer(users, many=True)
+#         return JsonResponse(
+#             {
+#                 "isSuccess": True,
+#                 "message": "Data retrieved successfully",
+#                 "data": users_serializer.data,
+#             },
+#             status=status.HTTP_200_OK,
+#         )
+
+"""hello guys"""
+
+User = get_user_model()
+
 class HomeView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JWTAuthentication,)
-
     def get(self, request):
         try:
+            if request.user.role == 'BLOGGER':
+                user_data = UserSerializer(request.user).data
+            elif request.user.role == 'ADMIN':
+                queryset = User.objects.all()
+                user_data = UserSerializer(queryset, many=True).data
+            else:
+                return Response(
+                    {"error": "Invalid user role"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             return Response(
                 {
                     "isSuccess": True,
-                    "message": "Login successful",
-                    "data": request.user.username,
-
+                    "message": "Data retrieved successfully",
+                    "data": user_data,
                 },
                 status=status.HTTP_200_OK,
             )
- 
 
         except Exception as e:
-            return custom_exception_handler(e, __name__) 
+            return Response(
+                {"error": "An error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-    # User = get_user_model()
-    # serializer_class = UserSerializer
-    # queryset = User.objects.all()
-    # pagination_class = StandardResultsSetPagination
+
+
+
+
 
 
 
